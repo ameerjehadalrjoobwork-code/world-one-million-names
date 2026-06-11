@@ -7,11 +7,159 @@ const GRID_SIZE = 100;
 const CELLS_PER_PAGE = GRID_SIZE * GRID_SIZE;
 const TOTAL_PAGES = 100;
 const TOTAL_CELLS = CELLS_PER_PAGE * TOTAL_PAGES;
-const PRICE = 5;
+const PRICE = 1;
 const BUCKET_NAME = "pixel-images";
 
 const ADMIN_USERNAME = import.meta.env.VITE_ADMIN_USERNAME || "admin";
 const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || "";
+
+
+const LANGUAGE_STORAGE_KEY = "millionSquaresLanguage";
+
+function getCurrentLanguage() {
+  try {
+    return localStorage.getItem(LANGUAGE_STORAGE_KEY) === "en" ? "en" : "ar";
+  } catch {
+    return "ar";
+  }
+}
+
+function getPriceText(language = getCurrentLanguage()) {
+  return language === "en" ? "$" + PRICE : PRICE + " دولار";
+}
+
+const TRANSLATIONS = {
+  ar: {
+    languageButton: "EN",
+    brandTitle: "مليون مربع عالمي",
+    brandSubtitle: "كل مربع له صاحب، صورة، قصة، ومكان ثابت على اللوحة.",
+    millionSquares: "المليون مربع",
+    counterLabel: "عدد المربعات من المليون",
+    counterText: "كل مربع يتم اعتماده يضيف اسماً جديداً إلى اللوحة.",
+    priceLabel: "سعر المربع",
+    reserveForPrice: () => "احجز مربعك بـ" + getPriceText("ar"),
+    reserveShort: "حجز",
+    previous: "السابق",
+    next: "التالي",
+    page: "صفحة",
+    search: "بحث",
+    admin: "مدير",
+    adminLogin: "دخول المدير",
+    dragHint: "اسحب اللوحة بالماوس. استخدم عجلة الماوس للتكبير والتصغير.",
+    goToCell: "اذهب إلى رقم مربع",
+    go: "اذهب",
+    cellPlaceholder: "مثلاً 12500",
+    boardControls: "التحكم باللوحة",
+    board: "لوحة رقم",
+    boardNote: "الأرقام تصاعدية من اليمين إلى اليسار. المحجوز يظهر بدون بيانات حتى الموافقة.",
+    reset: "البداية",
+    pageChange: "تغيير الصفحة",
+    pageNumber: "رقم الصفحة",
+    pagePlaceholder: "مثلاً 2",
+    goToPage: "اذهب إلى الصفحة",
+    searchCell: "البحث عن مربع",
+    cellNumber: "رقم المربع",
+    goToSquare: "اذهب إلى المربع",
+    square: "مربع",
+    locationDefault: "العالم",
+    noDescription: "لا يوجد وصف لهذا المربع بعد.",
+    addedDate: "تاريخ الإضافة:",
+    reserveSquare: "حجز مربع",
+    uploadTitle: "ارفع صورتك واحجز مكانك",
+    name: "الاسم",
+    city: "المدينة / الدولة",
+    description: "وصف قصير",
+    email: "البريد الإلكتروني للدفع",
+    phone: "رقم الهاتف",
+    uploadStrong: "اضغط لرفع الصورة",
+    uploadHint: "JPG / PNG / WEBP",
+    preparingPayment: "جاري تجهيز الدفع...",
+    payButton: () => "ادفع " + getPriceText("ar") + " عبر Togo",
+    paymentSuccessTitle: "تم الرجوع من صفحة الدفع",
+    paymentCancelTitle: "تم إلغاء الدفع",
+    paymentSuccessText: "وصل المستخدم من Togo بعد عملية الدفع. سيبقى الطلب بانتظار تأكيد الإدارة ثم الموافقة على الصورة قبل الظهور.",
+    paymentCancelText: "لم تكتمل عملية الدفع. يمكن للمستخدم الرجوع للموقع والمحاولة مرة أخرى.",
+    squareNumber: "رقم المربع:",
+    backToBoard: "الرجوع للوحة",
+  },
+  en: {
+    languageButton: "عربي",
+    brandTitle: "One Million Squares",
+    brandSubtitle: "Each square has an owner, a photo, a story, and a permanent place on the board.",
+    millionSquares: "One million squares",
+    counterLabel: "Squares approved out of one million",
+    counterText: "Every approved square adds a new story to the board.",
+    priceLabel: "Square price",
+    reserveForPrice: () => "Reserve your square for " + getPriceText("en"),
+    reserveShort: "Reserve",
+    previous: "Previous",
+    next: "Next",
+    page: "Page",
+    search: "Search",
+    admin: "Admin",
+    adminLogin: "Admin login",
+    dragHint: "Drag the board with your mouse. Use the mouse wheel to zoom in and out.",
+    goToCell: "Go to square number",
+    go: "Go",
+    cellPlaceholder: "Example 12500",
+    boardControls: "Board controls",
+    board: "Board",
+    boardNote: "Numbers are ordered across the board. Reserved squares stay hidden until approval.",
+    reset: "Reset",
+    pageChange: "Change page",
+    pageNumber: "Page number",
+    pagePlaceholder: "Example 2",
+    goToPage: "Go to page",
+    searchCell: "Search for a square",
+    cellNumber: "Square number",
+    goToSquare: "Go to square",
+    square: "Square",
+    locationDefault: "Worldwide",
+    noDescription: "No description has been added to this square yet.",
+    addedDate: "Added on:",
+    reserveSquare: "Reserve square",
+    uploadTitle: "Upload your photo and reserve your place",
+    name: "Name",
+    city: "City / Country",
+    description: "Short description",
+    email: "Payment email",
+    phone: "Phone number",
+    uploadStrong: "Tap to upload photo",
+    uploadHint: "JPG / PNG / WEBP",
+    preparingPayment: "Preparing payment...",
+    payButton: () => "Pay " + getPriceText("en") + " via Togo",
+    paymentSuccessTitle: "Returned from payment page",
+    paymentCancelTitle: "Payment cancelled",
+    paymentSuccessText: "The user returned from Togo after payment. The request will wait for admin payment confirmation and photo approval before appearing.",
+    paymentCancelText: "The payment was not completed. You can return to the board and try again.",
+    squareNumber: "Square number:",
+    backToBoard: "Back to board",
+  },
+};
+
+function t(key) {
+  const language = getCurrentLanguage();
+  const value = TRANSLATIONS[language]?.[key] ?? TRANSLATIONS.ar[key] ?? key;
+  return typeof value === "function" ? value() : value;
+}
+
+function LanguageToggle() {
+  const [language, setLanguage] = useState(getCurrentLanguage());
+
+  function toggleLanguage() {
+    const nextLanguage = language === "ar" ? "en" : "ar";
+    localStorage.setItem(LANGUAGE_STORAGE_KEY, nextLanguage);
+    setLanguage(nextLanguage);
+    window.location.reload();
+  }
+
+  return (
+    <button type="button" className="languageToggle" onClick={toggleLanguage}>
+      {TRANSLATIONS[language]?.languageButton || "EN"}
+    </button>
+  );
+}
+
 
 function getPageFromCellId(cellId) {
   return Math.ceil(cellId / CELLS_PER_PAGE);
@@ -186,22 +334,21 @@ function PaymentResult({ type, cellId }) {
 
   return (
     <main className="resultPage">
+      <LanguageToggle />
       <section className={`resultCard ${isSuccess ? "success" : "cancel"}`}>
         <span className="resultIcon">{isSuccess ? "✓" : "!"}</span>
 
-        <h1>{isSuccess ? "تم الرجوع من صفحة الدفع" : "تم إلغاء الدفع"}</h1>
+        <h1>{isSuccess ? t("paymentSuccessTitle") : t("paymentCancelTitle")}</h1>
 
         <p>
-          {isSuccess
-            ? "وصل المستخدم من Togo بعد عملية الدفع. سيبقى الطلب بانتظار تأكيد الإدارة ثم الموافقة على الصورة قبل الظهور."
-            : "لم تكتمل عملية الدفع. يمكن للمستخدم الرجوع للموقع والمحاولة مرة أخرى."}
+          {isSuccess ? t("paymentSuccessText") : t("paymentCancelText")}
         </p>
 
-        {cellId && <strong>رقم المربع: #{cellId}</strong>}
+        {cellId && <strong>{t("squareNumber")} #{cellId}</strong>}
 
         <div className="resultActions">
-          <button onClick={goHome}>الرجوع للوحة</button>
-          <button onClick={goAdmin}>دخول المدير</button>
+          <button onClick={goHome}>{t("backToBoard")}</button>
+          <button onClick={goAdmin}>{t("adminLogin")}</button>
         </div>
       </section>
     </main>
@@ -483,8 +630,9 @@ function PublicBoard() {
 
   return (
     <main className="appShell">
+      <LanguageToggle />
       <div className="mobileTopCounter">
-        <span>المليون مربع</span>
+        <span>{t("millionSquares")}</span>
 
         <strong>
           {totalApprovedCount.toLocaleString("en-US")} / {TOTAL_CELLS.toLocaleString("en-US")}
@@ -498,7 +646,7 @@ function PublicBoard() {
       <div className="mobileBottomDock">
         <button type="button" onClick={reserveFirstEmpty}>
           ＋
-          <span>حجز</span>
+          <span>{t("reserveShort")}</span>
         </button>
 
         <button
@@ -507,12 +655,12 @@ function PublicBoard() {
           disabled={currentPage === 1}
         >
           ‹
-          <span>السابق</span>
+          <span>{t("previous")}</span>
         </button>
 
         <button type="button" onClick={() => setMobilePanel("page")}>
           {currentPage}
-          <span>صفحة</span>
+          <span>{t("page")}</span>
         </button>
 
         <button
@@ -521,12 +669,12 @@ function PublicBoard() {
           disabled={currentPage === TOTAL_PAGES}
         >
           ›
-          <span>التالي</span>
+          <span>{t("next")}</span>
         </button>
 
         <button type="button" onClick={() => setMobilePanel("search")}>
           🔎
-          <span>بحث</span>
+          <span>{t("search")}</span>
         </button>
       </div>
 
@@ -535,14 +683,14 @@ function PublicBoard() {
           <span className="logoBox"></span>
 
           <div>
-            <h1>مليون مربع فلسطيني</h1>
-            <p>كل مربع له صاحب، صورة، قصة، ومكان ثابت على اللوحة.</p>
+            <h1>{t("brandTitle")}</h1>
+            <p>{t("brandSubtitle")}</p>
           </div>
         </div>
 
         <div className="millionProgressCard">
           <div className="progressTop">
-            <span>عدد المربعات من المليون</span>
+            <span>{t("counterLabel")}</span>
 
             <strong>
               {totalApprovedCount.toLocaleString("en-US")} / {TOTAL_CELLS.toLocaleString("en-US")}
@@ -558,22 +706,20 @@ function PublicBoard() {
             />
           </div>
 
-          <p>كل مربع يتم اعتماده يضيف اسماً جديداً إلى اللوحة.</p>
+          <p>{t("counterText")}</p>
         </div>
 
         <div className="priceGoldCard">
-          <span>سعر المربع</span>
-          <strong>{PRICE} شيكل</strong>
+          <span>{t("priceLabel")}</span>
+          <strong>{getPriceText()}</strong>
         </div>
 
         <button className="primaryBtn" onClick={reserveFirstEmpty}>
-          احجز أول مربع فارغ
+          {t("reserveForPrice")}
         </button>
 
         <div className="pageBox">
-          <button onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1}>
-            السابق
-          </button>
+          <button onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1}>{t("previous")}</button>
 
           <form
             onSubmit={(e) => {
@@ -581,7 +727,7 @@ function PublicBoard() {
               goToPage(pageInput);
             }}
           >
-            <span>الصفحة</span>
+            <span>{t("page")}</span>
 
             <div className="pageInputRow">
               <input
@@ -597,33 +743,31 @@ function PublicBoard() {
           <button
             onClick={() => goToPage(currentPage + 1)}
             disabled={currentPage === TOTAL_PAGES}
-          >
-            التالي
-          </button>
+          >{t("next")}</button>
         </div>
 
         <div className="sidebarBottomBox">
-  <p>اسحب اللوحة بالماوس. استخدم عجلة الماوس للتكبير والتصغير.</p>
+  <p>{t("dragHint")}</p>
 </div>
 
 
         <form className="searchBox" onSubmit={handleSearchCell}>
-  <label>اذهب إلى رقم مربع</label>
+  <label>{t("goToCell")}</label>
 
   <div>
-    <button>اذهب</button>
+    <button>{t("go")}</button>
 
     <input
       value={cellSearch}
       onChange={(e) => setCellSearch(e.target.value)}
-      placeholder="مثلاً 12500"
+      placeholder={t("cellPlaceholder")}
       inputMode="numeric"
     />
   </div>
 </form>
 
 <div className="desktopBoardControls">
-  <label>التحكم باللوحة</label>
+  <label>{t("boardControls")}</label>
 
   <div className="desktopBoardControlsRow">
     <button type="button" onClick={() => canvasRef.current?.zoomIn?.()}>
@@ -637,7 +781,7 @@ function PublicBoard() {
     </button>
 
     <button type="button" onClick={() => canvasRef.current?.reset?.()}>
-      البداية
+      {t("reset")}
     </button>
   </div>
 </div>
@@ -660,7 +804,7 @@ function PublicBoard() {
     </button>
 
     <button type="button" onClick={() => canvasRef.current?.reset?.()}>
-      البداية
+      {t("reset")}
     </button>
   </div>
 </header>
@@ -689,7 +833,7 @@ function PublicBoard() {
 
             {mobilePanel === "page" && (
               <>
-                <h3>تغيير الصفحة</h3>
+                <h3>{t("pageChange")}</h3>
 
                 <form
                   className="mobileSearchForm"
@@ -698,35 +842,35 @@ function PublicBoard() {
                     goToPage(pageInput);
                   }}
                 >
-                  <label>رقم الصفحة</label>
+                  <label>{t("pageNumber")}</label>
 
                   <input
                     value={pageInput}
                     onChange={(e) => setPageInput(e.target.value)}
                     inputMode="numeric"
-                    placeholder="مثلاً 2"
+                    placeholder={t("pagePlaceholder")}
                   />
 
-                  <button type="submit">اذهب إلى الصفحة</button>
+                  <button type="submit">{t("goToPage")}</button>
                 </form>
               </>
             )}
 
             {mobilePanel === "search" && (
               <>
-                <h3>البحث عن مربع</h3>
+                <h3>{t("searchCell")}</h3>
 
                 <form className="mobileSearchForm" onSubmit={handleSearchCell}>
-                  <label>رقم المربع</label>
+                  <label>{t("cellNumber")}</label>
 
                   <input
                     value={cellSearch}
                     onChange={(e) => setCellSearch(e.target.value)}
-                    placeholder="مثلاً 12500"
+                    placeholder={t("cellPlaceholder")}
                     inputMode="numeric"
                   />
 
-                  <button type="submit">اذهب إلى المربع</button>
+                  <button type="submit">{t("goToSquare")}</button>
                 </form>
               </>
             )}
@@ -741,19 +885,19 @@ function PublicBoard() {
               ×
             </button>
 
-            <span className="modalBadge">مربع #{selectedCell.id}</span>
+            <span className="modalBadge">{t("square")} #{selectedCell.id}</span>
 
             <img className="detailsImage" src={selectedCell.imageUrl} alt="" />
 
             <h2>{selectedCell.ownerName}</h2>
 
-            <p className="muted">📍 {selectedCell.city || "فلسطين"}</p>
+            <p className="muted">📍 {selectedCell.city || t("locationDefault")}</p>
 
             <p className="description">
-              {selectedCell.description || "لا يوجد وصف لهذا المربع بعد."}
+              {selectedCell.description || t("noDescription")}
             </p>
 
-            <p className="dateText">تاريخ الإضافة: {formatDate(selectedCell.createdAt)}</p>
+            <p className="dateText">{t("addedDate")} {formatDate(selectedCell.createdAt)}</p>
           </div>
         </div>
       )}
@@ -774,13 +918,13 @@ function PublicBoard() {
               ×
             </button>
 
-            <span className="modalBadge">حجز مربع #{buyCell.id}</span>
+            <span className="modalBadge">{t("reserveSquare")} #{buyCell.id}</span>
 
-            <h2>ارفع صورتك واحجز مكانك</h2>
+            <h2>{t("uploadTitle")}</h2>
 
             <input
               type="text"
-              placeholder="الاسم"
+              placeholder={t("name")}
               value={buyCell.ownerName}
               disabled={isSaving}
               onChange={(e) =>
@@ -793,7 +937,7 @@ function PublicBoard() {
 
             <input
               type="text"
-              placeholder="المدينة"
+              placeholder={t("city")}
               value={buyCell.city}
               disabled={isSaving}
               onChange={(e) =>
@@ -805,7 +949,7 @@ function PublicBoard() {
             />
 
             <textarea
-              placeholder="وصف قصير"
+              placeholder={t("description")}
               value={buyCell.description}
               disabled={isSaving}
               onChange={(e) =>
@@ -818,7 +962,7 @@ function PublicBoard() {
 
             <input
               type="email"
-              placeholder="البريد الإلكتروني للدفع"
+              placeholder={t("email")}
               value={buyCell.buyerEmail}
               disabled={isSaving}
               onChange={(e) =>
@@ -831,7 +975,7 @@ function PublicBoard() {
 
             <input
               type="tel"
-              placeholder="رقم الهاتف"
+              placeholder={t("phone")}
               value={buyCell.buyerPhone}
               disabled={isSaving}
               onChange={(e) =>
@@ -847,8 +991,8 @@ function PublicBoard() {
                 <img src={buyCell.imagePreviewUrl} alt="preview" />
               ) : (
                 <div>
-                  <strong>اضغط لرفع الصورة</strong>
-                  <span>JPG / PNG / WEBP</span>
+                  <strong>{t("uploadStrong")}</strong>
+                  <span>{t("uploadHint")}</span>
                 </div>
               )}
 
@@ -862,7 +1006,7 @@ function PublicBoard() {
             </label>
 
             <button className="buyBtn" type="submit" disabled={isSaving}>
-              {isSaving ? "جاري تجهيز الدفع..." : `ادفع ${PRICE} شيكل عبر Togo`}
+              {isSaving ? t("preparingPayment") : t("payButton")}
             </button>
           </form>
         </div>
@@ -883,6 +1027,19 @@ function AdminPage() {
   const [adminSearch, setAdminSearch] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [busyId, setBusyId] = useState(null);
+
+
+  const [manualCell, setManualCell] = useState({
+    cellId: "",
+    ownerName: "",
+    city: "",
+    description: "",
+    buyerEmail: "",
+    buyerPhone: "",
+    imagePreviewUrl: "",
+    file: null,
+  });
+  const [isManualSaving, setIsManualSaving] = useState(false);
 
   const [counts, setCounts] = useState({
     pending_payment: 0,
@@ -1115,15 +1272,134 @@ function AdminPage() {
     await loadAdminData(statusFilter);
   }
 
+
+  function updateManualCell(field, value) {
+    setManualCell((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  }
+
+  function handleManualImageUpload(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setManualCell((prev) => ({
+      ...prev,
+      file,
+      imagePreviewUrl: URL.createObjectURL(file),
+    }));
+  }
+
+  function resetManualCellForm() {
+    setManualCell({
+      cellId: "",
+      ownerName: "",
+      city: "",
+      description: "",
+      buyerEmail: "",
+      buyerPhone: "",
+      imagePreviewUrl: "",
+      file: null,
+    });
+  }
+
+  async function createManualCell(e) {
+    e.preventDefault();
+
+    const cellId = Number(manualCell.cellId);
+
+    if (!cellId || cellId < 1 || cellId > TOTAL_CELLS) {
+      alert("اكتب رقم مربع صحيح من 1 إلى " + TOTAL_CELLS.toLocaleString("en-US"));
+      return;
+    }
+
+    if (!manualCell.ownerName.trim()) {
+      alert("اكتب الاسم");
+      return;
+    }
+
+    if (!manualCell.file) {
+      alert("ارفع صورة للمربع");
+      return;
+    }
+
+    setIsManualSaving(true);
+
+    try {
+      const existing = await supabase
+        .from("pixel_cells")
+        .select("id,status")
+        .eq("id", cellId)
+        .maybeSingle();
+
+      if (existing.error) {
+        throw existing.error;
+      }
+
+      if (existing.data) {
+        const overwrite = window.confirm(
+          "المربع #" + cellId + " موجود حالياً. هل تريد استبداله وإظهاره مباشرة؟"
+        );
+
+        if (!overwrite) {
+          setIsManualSaving(false);
+          return;
+        }
+      }
+
+      const pageNumber = getPageFromCellId(cellId);
+      const { row, col } = getRowColFromCellId(cellId);
+      const optimizedFile = await compressImage(manualCell.file);
+      const imageUrl = await uploadImageToSupabase(optimizedFile, cellId, pageNumber);
+
+      const { error } = await supabase.from("pixel_cells").upsert(
+        {
+          id: cellId,
+          page_number: pageNumber,
+          row,
+          col,
+          owner_name: manualCell.ownerName.trim(),
+          city: manualCell.city.trim(),
+          description: manualCell.description.trim(),
+          image_url: imageUrl,
+          buyer_email: manualCell.buyerEmail.trim(),
+          buyer_phone: manualCell.buyerPhone.trim(),
+          status: "approved",
+          payment_confirmed_at: new Date().toISOString(),
+        },
+        {
+          onConflict: "id",
+        }
+      );
+
+      if (error) {
+        throw error;
+      }
+
+      alert("تمت إضافة المربع #" + cellId + " وظهر مباشرة على اللوحة");
+      resetManualCellForm();
+      await loadAdminData(statusFilter);
+      await loadCounts();
+    } catch (error) {
+      console.error(error);
+      alert(error.message || "فشل إضافة المربع يدوياً");
+    } finally {
+      setIsManualSaving(false);
+    }
+  }
+
+
   if (!session) {
     return (
       <main className="adminLoginPage">
+      <LanguageToggle />
         <form className="adminLoginCard" onSubmit={handleLogin}>
           <a className="backHome" href="#">
             الرجوع للوحة
           </a>
 
-          <h1>دخول المدير</h1>
+          <h1>{t("adminLogin")}</h1>
 
           <p>هذه الصفحة مخصصة لإدارة الطلبات وتأكيد الدفع والموافقة على الصور.</p>
 
@@ -1158,6 +1434,7 @@ function AdminPage() {
 
   return (
     <main className="adminPage">
+      <LanguageToggle />
       <header className="adminTop">
         <div>
           <a className="backHome" href="#">
@@ -1207,6 +1484,102 @@ function AdminPage() {
           <span>مرفوض</span>
         </button>
       </section>
+
+      <section className="manualAddCard">
+        <div className="manualAddHead">
+          <div>
+            <h2>إضافة مربع يدوياً</h2>
+            <p>كمدير، تستطيع إضافة أي اسم وصورة في أي مربع وإظهاره مباشرة بدون دفع.</p>
+          </div>
+        </div>
+
+        <form className="manualAddForm" onSubmit={createManualCell}>
+          <label>
+            رقم المربع
+            <input
+              value={manualCell.cellId}
+              onChange={(e) => updateManualCell("cellId", e.target.value)}
+              inputMode="numeric"
+              placeholder="مثلاً 1948"
+              disabled={isManualSaving}
+            />
+          </label>
+
+          <label>
+            الاسم
+            <input
+              value={manualCell.ownerName}
+              onChange={(e) => updateManualCell("ownerName", e.target.value)}
+              placeholder="اسم الشخص أو الجهة"
+              disabled={isManualSaving}
+            />
+          </label>
+
+          <label>
+            المدينة / الدولة
+            <input
+              value={manualCell.city}
+              onChange={(e) => updateManualCell("city", e.target.value)}
+              placeholder="مثلاً London أو Nablus"
+              disabled={isManualSaving}
+            />
+          </label>
+
+          <label>
+            الإيميل اختياري
+            <input
+              value={manualCell.buyerEmail}
+              onChange={(e) => updateManualCell("buyerEmail", e.target.value)}
+              placeholder="optional@email.com"
+              disabled={isManualSaving}
+            />
+          </label>
+
+          <label>
+            الهاتف اختياري
+            <input
+              value={manualCell.buyerPhone}
+              onChange={(e) => updateManualCell("buyerPhone", e.target.value)}
+              placeholder="رقم الهاتف"
+              disabled={isManualSaving}
+            />
+          </label>
+
+          <label className="manualAddWide">
+            وصف قصير
+            <textarea
+              value={manualCell.description}
+              onChange={(e) => updateManualCell("description", e.target.value)}
+              placeholder="وصف قصير يظهر داخل تفاصيل المربع"
+              disabled={isManualSaving}
+            />
+          </label>
+
+          <label className="manualImageBox">
+            {manualCell.imagePreviewUrl ? (
+              <img src={manualCell.imagePreviewUrl} alt="preview" />
+            ) : (
+              <div>
+                <strong>اضغط لاختيار صورة</strong>
+                <span>JPG / PNG / WEBP</span>
+              </div>
+            )}
+
+            <input
+              type="file"
+              accept="image/*"
+              hidden
+              disabled={isManualSaving}
+              onChange={handleManualImageUpload}
+            />
+          </label>
+
+          <button type="submit" disabled={isManualSaving}>
+            {isManualSaving ? "جاري الإضافة..." : "إضافة وإظهار مباشرة"}
+          </button>
+        </form>
+      </section>
+
 
       <section className="adminControls">
         <input

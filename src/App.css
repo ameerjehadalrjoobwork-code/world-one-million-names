@@ -1701,3 +1701,152 @@ a {
     transform: translateY(2px) !important;
   }
 }
+
+/* =========================================================
+   Global language + admin manual add
+   هذه الإضافات لا تغيّر أماكن أزرار الجوال أو الكمبيوتر
+========================================================= */
+
+.languageToggle {
+  position: fixed;
+  top: 18px;
+  left: 18px;
+  z-index: 500;
+  height: 38px;
+  min-width: 56px;
+  border: 0;
+  border-radius: 999px;
+  background: #111827;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 950;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+}
+
+.manualAddCard {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 16px;
+  padding: 18px;
+  border-radius: 26px;
+  background: #ffffff;
+  border: 1px solid #e7dfd3;
+  box-shadow: 0 18px 55px rgba(0, 0, 0, 0.08);
+}
+
+.manualAddHead h2 {
+  margin: 0 0 4px;
+  color: #111827;
+  font-size: 24px;
+  font-weight: 950;
+}
+
+.manualAddHead p {
+  margin: 0;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 750;
+  line-height: 1.7;
+}
+
+.manualAddForm {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  align-items: end;
+}
+
+.manualAddForm label {
+  display: grid;
+  gap: 7px;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.manualAddForm input,
+.manualAddForm textarea {
+  width: 100%;
+  border: 1px solid #ded8cf;
+  background: #ffffff;
+  color: #111827;
+  border-radius: 16px;
+  padding: 11px 12px;
+  font-size: 14px;
+  font-weight: 750;
+  outline: none;
+}
+
+.manualAddForm textarea {
+  min-height: 74px;
+  resize: vertical;
+}
+
+.manualAddWide {
+  grid-column: span 2;
+}
+
+.manualImageBox {
+  min-height: 94px;
+  display: grid !important;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 18px;
+  border: 2px dashed #c9bfb0;
+  background: #faf7f2;
+  text-align: center;
+  cursor: pointer;
+}
+
+.manualImageBox div {
+  display: grid;
+  gap: 4px;
+}
+
+.manualImageBox strong {
+  font-size: 13px;
+  color: #334155;
+}
+
+.manualImageBox span {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.manualImageBox img {
+  width: 100%;
+  height: 100%;
+  min-height: 94px;
+  object-fit: cover;
+}
+
+.manualAddForm button {
+  height: 48px;
+  border: 0;
+  border-radius: 16px;
+  background: #00d084;
+  color: #04130d;
+  font-size: 14px;
+  font-weight: 950;
+}
+
+@media (max-width: 900px) {
+  .manualAddForm {
+    grid-template-columns: 1fr;
+  }
+
+  .manualAddWide {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 768px) and (hover: none) and (pointer: coarse) {
+  .languageToggle {
+    top: 12px;
+    left: 12px;
+    height: 30px;
+    min-width: 44px;
+    font-size: 11px;
+    z-index: 600;
+  }
+}

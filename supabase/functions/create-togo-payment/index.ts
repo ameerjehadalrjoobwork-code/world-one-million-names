@@ -2,7 +2,7 @@ import "@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const TOGO_BASE_URL = "https://api.togo.ps";
-const PRICE = 5;
+const PRICE = 1;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -190,7 +190,7 @@ Deno.serve(async (req) => {
           value: PRICE,
           receiver_address_id: receiverAddressId,
           receiver_email: String(buyerEmail).trim(),
-          currency: "ILS",
+          currency: "USD",
           source: "external_website",
           payment_success_redirect_link: successUrl,
           payment_cancel_redirect_link: cancelUrl,
@@ -240,7 +240,7 @@ Deno.serve(async (req) => {
       buyer_email: buyerEmail,
       buyer_phone: buyerPhone,
       amount: PRICE,
-      currency: "ILS",
+      currency: "USD",
       status: "created",
       togo_receiver_address_id: receiverAddressId,
       togo_order_id: orderId,
