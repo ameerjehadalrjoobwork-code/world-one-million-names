@@ -1135,7 +1135,7 @@ a {
 
   .mobileBottomDock {
     display: grid !important;
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 6px;
     position: fixed;
     right: 10px;
@@ -1496,5 +1496,50 @@ a {
   .toolbar span {
     min-width: 42px !important;
     font-size: 12px !important;
+  }
+}/* =========================
+   Remove admin UI only
+   رابط المدير يظل شغال، فقط نخفي الأزرار من الواجهة
+========================= */
+
+/* كمبيوتر فقط */
+@media (min-width: 769px) and (hover: hover) and (pointer: fine) {
+  .sidebarBottomBox {
+    padding: 14px 16px !important;
+    min-height: auto !important;
+  }
+
+  .sidebarBottomBox p {
+    margin: 0 !important;
+    font-size: 12px !important;
+    line-height: 1.6 !important;
+    text-align: center !important;
+  }
+}
+
+/* تلفون فقط */
+@media (max-width: 768px) and (hover: none) and (pointer: coarse) {
+  .mobileBottomDock {
+    grid-template-columns: repeat(5, 1fr) !important;
+  }
+
+  .mobileBottomDock button,
+  .mobileBottomDock a {
+    height: 50px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 1px !important;
+    padding: 4px 2px 5px !important;
+    line-height: 1 !important;
+  }
+
+  .mobileBottomDock span {
+    display: block !important;
+    font-size: 9px !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+    transform: translateY(-3px) !important;
   }
 }

@@ -528,11 +528,6 @@ function PublicBoard() {
           🔎
           <span>بحث</span>
         </button>
-
-        <a href="#admin">
-          ⚙
-          <span>مدير</span>
-        </a>
       </div>
 
       <aside className="sidebar">
@@ -608,12 +603,9 @@ function PublicBoard() {
         </div>
 
         <div className="sidebarBottomBox">
-          <a className="adminLink" href="#admin">
-            دخول المدير
-          </a>
+  <p>اسحب اللوحة بالماوس. استخدم عجلة الماوس للتكبير والتصغير.</p>
+</div>
 
-          <p>اسحب اللوحة بالماوس. استخدم عجلة الماوس للتكبير والتصغير.</p>
-        </div>
 
         <form className="searchBox" onSubmit={handleSearchCell}>
           <label>اذهب إلى رقم مربع</label>
