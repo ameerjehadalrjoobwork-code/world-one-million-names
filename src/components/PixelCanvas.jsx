@@ -87,7 +87,17 @@ const PixelCanvas = forwardRef(function PixelCanvas(
 ) {
   const wrapperRef = useRef(null);
   const canvasRef = useRef(null);
-
+const touchRef = useRef({
+  mode: "none",
+  lastX: 0,
+  lastY: 0,
+  startDistance: 0,
+  startCenterX: 0,
+  startCenterY: 0,
+  startCamera: null,
+  anchorX: 0,
+  anchorY: 0,
+});
   const imageCacheRef = useRef({});
   const rafRef = useRef(null);
   const animationRef = useRef(null);
@@ -830,6 +840,155 @@ const PixelCanvas = forwardRef(function PixelCanvas(
     hoverCellRef.current = null;
     requestDraw();
   }
+useEffect(() => {
+  const el = wrapperRef.current;
+  if (!el) return;
+
+  function getDistance(t1, t2) {
+    const dx = t1.clientX - t2.clientX;
+    const dy = t1.clientY - t2.clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  function getCenter(t1, t2) {
+    return {
+      x: (t1.clientX + t2.clientX) / 2,
+      y: (t1.clientY + t2.clientY) / 2,
+    };
+  }
+
+  function handleTouchStart(e) {
+    if (e.touches.length === 1) {
+      const touch = e.touches[0];
+
+      touchRef.current = {
+        ...touchRef.current,
+        mode: "pan",
+        lastX: touch.clientX,
+        lastY: touch.clientY,
+      };
+
+      cancelCameraAnimation?.();
+      return;
+    }
+
+    if (e.touches.length === 2) {
+      e.preventDefault();
+
+      const rect = el.getBoundingClientRect();
+      const t1 = e.touches[0];
+      const t2 = e.touches[1];
+      const center = getCenter(t1, t2);
+      const startCamera = cameraRef.current;
+
+      const localCenterX = center.x - rect.left;
+      const localCenterY = center.y - rect.top;
+
+      const fromRight = rect.width - localCenterX - BOARD_PADDING;
+      const fromTop = localCenterY - BOARD_PADDING;
+
+      const anchorX = startCamera.x + fromRight / startCamera.scale;
+      const anchorY = startCamera.y + fromTop / startCamera.scale;
+
+      touchRef.current = {
+        ...touchRef.current,
+        mode: "pinch",
+        startDistance: getDistance(t1, t2),
+        startCenterX: center.x,
+        startCenterY: center.y,
+        startCamera,
+        anchorX,
+        anchorY,
+      };
+
+      cancelCameraAnimation?.();
+    }
+  }
+
+  function handleTouchMove(e) {
+    if (e.touches.length === 1 && touchRef.current.mode === "pan") {
+      e.preventDefault();
+
+      const touch = e.touches[0];
+      const cam = cameraRef.current;
+
+      const dx = touch.clientX - touchRef.current.lastX;
+      const dy = touch.clientY - touchRef.current.lastY;
+
+      touchRef.current.lastX = touch.clientX;
+      touchRef.current.lastY = touch.clientY;
+
+      setSafeCamera({
+        ...cam,
+        x: cam.x + dx / cam.scale,
+        y: cam.y - dy / cam.scale,
+      });
+
+      return;
+    }
+
+    if (e.touches.length === 2 && touchRef.current.mode === "pinch") {
+      e.preventDefault();
+
+      const rect = el.getBoundingClientRect();
+      const t1 = e.touches[0];
+      const t2 = e.touches[1];
+
+      const distance = getDistance(t1, t2);
+      const center = getCenter(t1, t2);
+
+      const startCamera = touchRef.current.startCamera;
+      if (!startCamera || !touchRef.current.startDistance) return;
+
+      const scaleFactor = distance / touchRef.current.startDistance;
+      const nextScale = clamp(
+        startCamera.scale * scaleFactor,
+        MIN_ZOOM,
+        MAX_ZOOM
+      );
+
+      const localCenterX = center.x - rect.left;
+      const localCenterY = center.y - rect.top;
+
+      const fromRight = rect.width - localCenterX - BOARD_PADDING;
+      const fromTop = localCenterY - BOARD_PADDING;
+
+      setSafeCamera({
+        scale: nextScale,
+        x: touchRef.current.anchorX - fromRight / nextScale,
+        y: touchRef.current.anchorY - fromTop / nextScale,
+      });
+    }
+  }
+
+  function handleTouchEnd(e) {
+  if (e.touches.length === 0) {
+    touchRef.current.mode = "none";
+    touchRef.current.startCamera = null;
+  }
+
+  if (e.touches.length === 1) {
+    const touch = e.touches[0];
+
+    touchRef.current.mode = "pan";
+    touchRef.current.lastX = touch.clientX;
+    touchRef.current.lastY = touch.clientY;
+    touchRef.current.startCamera = null;
+  }
+}
+
+  el.addEventListener("touchstart", handleTouchStart, { passive: false });
+  el.addEventListener("touchmove", handleTouchMove, { passive: false });
+  el.addEventListener("touchend", handleTouchEnd, { passive: false });
+  el.addEventListener("touchcancel", handleTouchEnd, { passive: false });
+
+  return () => {
+    el.removeEventListener("touchstart", handleTouchStart);
+    el.removeEventListener("touchmove", handleTouchMove);
+    el.removeEventListener("touchend", handleTouchEnd);
+    el.removeEventListener("touchcancel", handleTouchEnd);
+  };
+}, [setSafeCamera]);
 
   return (
     <div

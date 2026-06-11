@@ -1573,4 +1573,179 @@ button {
 .searchBox input,
 .searchBox button {
   height: 48px !important;
+}/* تحسين تجربة الجوال بدون التأثير على الكمبيوتر */
+@media (max-width: 768px) {
+  html,
+  body,
+  #root {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .appShell {
+    height: 100svh !important;
+    min-height: 100svh !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    padding: 10px !important;
+    overflow: hidden !important;
+  }
+
+  .boardSection {
+    order: 1 !important;
+    flex: 0 0 68svh !important;
+    height: 68svh !important;
+    min-height: 390px !important;
+    width: 100% !important;
+    border-radius: 24px !important;
+    overflow: hidden !important;
+  }
+
+  .sidebar {
+    order: 2 !important;
+    width: 100% !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    border-radius: 24px !important;
+    padding: 14px 16px !important;
+    gap: 10px !important;
+  }
+
+  .brand {
+    gap: 10px !important;
+  }
+
+  .brand h1 {
+    font-size: 24px !important;
+    line-height: 1.25 !important;
+  }
+
+  .brand p {
+    font-size: 13px !important;
+    line-height: 1.6 !important;
+  }
+
+  .millionProgressCard {
+    padding: 12px !important;
+    border-radius: 18px !important;
+    gap: 8px !important;
+  }
+
+  .progressTop strong {
+    font-size: 17px !important;
+  }
+
+  .progressTop span {
+    font-size: 13px !important;
+  }
+
+  .millionProgressCard p {
+    font-size: 12px !important;
+    line-height: 1.5 !important;
+  }
+
+  .priceGoldCard {
+    padding: 13px !important;
+    border-radius: 18px !important;
+  }
+
+  .priceGoldCard strong {
+    font-size: 28px !important;
+  }
+
+  .primaryBtn {
+    min-height: 48px !important;
+    border-radius: 16px !important;
+    font-size: 16px !important;
+  }
+
+  .pageBox {
+    padding: 10px !important;
+    border-radius: 18px !important;
+    gap: 8px !important;
+  }
+
+  .pageBox button {
+    height: 46px !important;
+    min-width: 76px !important;
+    border-radius: 14px !important;
+  }
+
+  .pageInputRow input {
+    width: 44px !important;
+    height: 38px !important;
+  }
+
+  .searchBox {
+    gap: 8px !important;
+  }
+
+  .searchBox label {
+    font-size: 13px !important;
+  }
+
+  .searchBox input,
+  .searchBox button {
+    height: 44px !important;
+    border-radius: 14px !important;
+  }
+
+  .sidebarBottomBox {
+    padding: 12px 14px !important;
+    border-radius: 18px !important;
+    gap: 6px !important;
+  }
+
+  .sidebarBottomBox .adminLink {
+    font-size: 15px !important;
+  }
+
+  .sidebarBottomBox p {
+    font-size: 11px !important;
+    line-height: 1.45 !important;
+  }
+
+  .boardHeader {
+    padding: 12px 14px !important;
+    gap: 8px !important;
+  }
+
+  .boardHeader h2 {
+    font-size: 20px !important;
+  }
+
+  .boardHeader p {
+    font-size: 12px !important;
+  }
+
+  .toolbar {
+    gap: 6px !important;
+  }
+
+  .toolbar button {
+    width: 42px !important;
+    height: 38px !important;
+    border-radius: 12px !important;
+  }
+
+  .toolbar span {
+    min-width: 46px !important;
+    font-size: 13px !important;
+  }
+
+  .boardSection canvas {
+    touch-action: none !important;
+    user-select: none !important;
+  }
+}
+
+/* منع المتصفح من سحب الصفحة بدل اللوحة */
+.boardSection,
+.boardSection canvas {
+  touch-action: none;
+  overscroll-behavior: contain;
 }
