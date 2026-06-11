@@ -198,6 +198,7 @@ function PublicBoard() {
 const [buyCell, setBuyCell] = useState(null);
 const [mobilePanel, setMobilePanel] = useState(null);
 
+
   const [zoomPercent, setZoomPercent] = useState(100);
   const [pageInput, setPageInput] = useState("1");
   const [cellSearch, setCellSearch] = useState("");
@@ -486,6 +487,57 @@ const progressPercent = useMemo(() => {
 
   return (
     <main className="appShell">
+      <div className="mobileTopCounter">
+  <span>المليون مربع</span>
+
+  <strong>
+    {totalApprovedCount.toLocaleString("en-US")} / {TOTAL_CELLS.toLocaleString("en-US")}
+  </strong>
+
+  <div>
+    <b style={{ width: `${progressPercent}%` }} />
+  </div>
+</div>
+
+<div className="mobileBottomDock">
+  <button type="button" onClick={reserveFirstEmpty}>
+    ＋
+    <span>حجز</span>
+  </button>
+
+  <button
+    type="button"
+    onClick={() => goToPage(currentPage - 1)}
+    disabled={currentPage === 1}
+  >
+    ‹
+    <span>السابق</span>
+  </button>
+
+  <button type="button" onClick={() => setMobilePanel("page")}>
+    {currentPage}
+    <span>صفحة</span>
+  </button>
+
+  <button
+    type="button"
+    onClick={() => goToPage(currentPage + 1)}
+    disabled={currentPage === TOTAL_PAGES}
+  >
+    ›
+    <span>التالي</span>
+  </button>
+
+  <button type="button" onClick={() => setMobilePanel("search")}>
+    🔎
+    <span>بحث</span>
+  </button>
+
+  <a href="#admin">
+    ⚙
+    <span>مدير</span>
+  </a>
+</div>
       <aside className="sidebar">
         <div className="brand">
           <span className="logoBox"></span>
@@ -742,6 +794,70 @@ const progressPercent = useMemo(() => {
             }}
           >
             <label>اكتب رقم المربع</label>
+
+            <input
+              value={cellSearch}
+              onChange={(e) => setCellSearch(e.target.value)}
+              placeholder="مثلاً 12500"
+              inputMode="numeric"
+            />
+
+            <button type="submit">اذهب إلى المربع</button>
+          </form>
+        </>
+      )}
+    </div>
+  </div>
+)}
+{mobilePanel && (
+  <div className="mobileSheetOverlay" onClick={() => setMobilePanel(null)}>
+    <div className="mobileSheet" onClick={(e) => e.stopPropagation()}>
+      <button
+        type="button"
+        className="mobileSheetClose"
+        onClick={() => setMobilePanel(null)}
+      >
+        ×
+      </button>
+
+      {mobilePanel === "page" && (
+        <>
+          <h3>تغيير الصفحة</h3>
+
+          <form
+            className="mobileSearchForm"
+            onSubmit={(e) => {
+              e.preventDefault();
+              goToPage(pageInput);
+              setMobilePanel(null);
+            }}
+          >
+            <label>رقم الصفحة</label>
+
+            <input
+              value={pageInput}
+              onChange={(e) => setPageInput(e.target.value)}
+              inputMode="numeric"
+              placeholder="مثلاً 2"
+            />
+
+            <button type="submit">اذهب إلى الصفحة</button>
+          </form>
+        </>
+      )}
+
+      {mobilePanel === "search" && (
+        <>
+          <h3>البحث عن مربع</h3>
+
+          <form
+            className="mobileSearchForm"
+            onSubmit={(e) => {
+              handleSearchCell(e);
+              setMobilePanel(null);
+            }}
+          >
+            <label>رقم المربع</label>
 
             <input
               value={cellSearch}
