@@ -39,6 +39,40 @@ function getFileExtension(file) {
   return fromName.replace(/[^a-z0-9]/g, "") || fallback;
 }
 
+function formatDate(value) {
+  if (!value) return "غير معروف";
+
+  try {
+    return new Date(value).toLocaleString("ar", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    });
+  } catch {
+    return value;
+  }
+}
+
+function getStatusLabel(status) {
+  if (status === "pending_payment") return "بانتظار الدفع";
+  if (status === "pending") return "قيد مراجعة الصورة";
+  if (status === "approved") return "موافق عليه";
+  if (status === "rejected") return "مرفوض";
+  return status || "غير معروف";
+}
+
+function getStatusClass(status) {
+  if (status === "approved") return "approved";
+  if (status === "pending") return "pending";
+  if (status === "pending_payment") return "pendingPayment";
+  if (status === "rejected") return "rejected";
+  return "";
+}
+
+function getHashParams(hash) {
+  const query = hash.includes("?") ? hash.split("?")[1] : "";
+  return new URLSearchParams(query);
+}
+
 function compressImage(file, maxSize = 1000, quality = 0.75) {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -47,6 +81,8 @@ function compressImage(file, maxSize = 1000, quality = 0.75) {
     reader.onload = () => {
       img.src = reader.result;
     };
+
+    reader.onerror = () => reject(new Error("فشل قراءة الصورة"));
 
     img.onload = () => {
       let { width, height } = img;
@@ -64,7 +100,6 @@ function compressImage(file, maxSize = 1000, quality = 0.75) {
       canvas.height = height;
 
       const ctx = canvas.getContext("2d");
-
       if (!ctx) {
         reject(new Error("فشل تجهيز الصورة"));
         return;
@@ -91,38 +126,9 @@ function compressImage(file, maxSize = 1000, quality = 0.75) {
       );
     };
 
-    img.onerror = () => reject(new Error("فشل قراءة الصورة"));
-    reader.onerror = () => reject(new Error("فشل تحميل الصورة"));
+    img.onerror = () => reject(new Error("فشل تحميل الصورة"));
     reader.readAsDataURL(file);
   });
-}
-
-function formatDate(value) {
-  if (!value) return "غير معروف";
-
-  try {
-    return new Date(value).toLocaleString("ar", {
-      dateStyle: "medium",
-      timeStyle: "short",
-    });
-  } catch {
-    return value;
-  }
-}
-
-function getStatusLabel(status) {
-  if (status === "pending_payment") return "بانتظار الدفع عبر Togo";
-  if (status === "pending") return "قيد مراجعة الصورة";
-  if (status === "approved") return "موافق عليه";
-  if (status === "rejected") return "مرفوض";
-  return status || "غير معروف";
-}
-
-function getPaymentMethodLabel(method) {
-  if (method === "togo") return "Togo";
-  if (method === "jawwal_pay") return "Jawwal Pay";
-  if (method === "palpay") return "PalPay";
-  return method || "غير محدد";
 }
 
 export default function App() {
@@ -143,46 +149,59 @@ export default function App() {
   }
 
   if (route.startsWith("#payment-success")) {
-    return <PaymentResult type="success" />;
+    const params = getHashParams(route);
+
+    return (
+      <PaymentResult
+        type="success"
+        cellId={params.get("cellId")}
+      />
+    );
   }
 
   if (route.startsWith("#payment-cancel")) {
-    return <PaymentResult type="cancel" />;
+    const params = getHashParams(route);
+
+    return (
+      <PaymentResult
+        type="cancel"
+        cellId={params.get("cellId")}
+      />
+    );
   }
 
   return <PublicBoard />;
 }
 
-function PaymentResult({ type }) {
-  const params = new URLSearchParams(window.location.hash.split("?")[1] || "");
-  const cellId = params.get("cellId");
-
+function PaymentResult({ type, cellId }) {
   const isSuccess = type === "success";
 
+  function goHome() {
+    window.location.hash = "";
+  }
+
+  function goAdmin() {
+    window.location.hash = "admin";
+  }
+
   return (
-    <main className="paymentResultPage">
-      <section className="paymentResultCard">
-        <div className={isSuccess ? "resultIcon success" : "resultIcon cancel"}>
-          {isSuccess ? "✓" : "×"}
-        </div>
+    <main className="resultPage">
+      <section className={`resultCard ${isSuccess ? "success" : "cancel"}`}>
+        <span className="resultIcon">{isSuccess ? "✓" : "!"}</span>
 
-        <h1>{isSuccess ? "تم الرجوع من صفحة الدفع" : "تم إلغاء عملية الدفع"}</h1>
+        <h1>{isSuccess ? "تم الرجوع من صفحة الدفع" : "تم إلغاء الدفع"}</h1>
 
-        {isSuccess ? (
-          <p>
-            تم إنشاء طلب الدفع للمربع #{cellId || "غير معروف"}. إذا تم الدفع بنجاح،
-            سيبقى الطلب بانتظار تأكيد الدفع من لوحة المدير ثم مراجعة الصورة.
-          </p>
-        ) : (
-          <p>
-            لم تكتمل عملية الدفع للمربع #{cellId || "غير معروف"}. يمكنك الرجوع
-            للموقع واختيار المربع من جديد.
-          </p>
-        )}
+        <p>
+          {isSuccess
+            ? "وصل المستخدم من Togo بعد عملية الدفع. سيبقى الطلب بانتظار تأكيد الإدارة ثم الموافقة على الصورة قبل الظهور."
+            : "لم تكتمل عملية الدفع. يمكن للمستخدم الرجوع للموقع والمحاولة مرة أخرى."}
+        </p>
 
-        <div className="paymentResultActions">
-          <a href="#">الرجوع للموقع</a>
-          <a href="#admin">دخول المدير</a>
+        {cellId && <strong>رقم المربع: #{cellId}</strong>}
+
+        <div className="resultActions">
+          <button onClick={goHome}>الرجوع للوحة</button>
+          <button onClick={goAdmin}>دخول المدير</button>
         </div>
       </section>
     </main>
@@ -195,9 +214,8 @@ function PublicBoard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [soldCells, setSoldCells] = useState({});
   const [selectedCell, setSelectedCell] = useState(null);
-const [buyCell, setBuyCell] = useState(null);
-const [mobilePanel, setMobilePanel] = useState(null);
-
+  const [buyCell, setBuyCell] = useState(null);
+  const [mobilePanel, setMobilePanel] = useState(null);
 
   const [zoomPercent, setZoomPercent] = useState(100);
   const [pageInput, setPageInput] = useState("1");
@@ -210,9 +228,10 @@ const [mobilePanel, setMobilePanel] = useState(null);
   const pageReservedCount = useMemo(() => {
     return Object.keys(soldCells).length;
   }, [soldCells]);
-const progressPercent = useMemo(() => {
-  return Math.min(100, (totalApprovedCount / TOTAL_CELLS) * 100);
-}, [totalApprovedCount]);
+
+  const progressPercent = useMemo(() => {
+    return Math.min(100, (totalApprovedCount / TOTAL_CELLS) * 100);
+  }, [totalApprovedCount]);
 
   useEffect(() => {
     loadPageCells(currentPage);
@@ -222,20 +241,14 @@ const progressPercent = useMemo(() => {
   async function loadPageCells(page) {
     setIsLoadingPage(true);
 
-    const { data: approvedData, error: approvedError } = await supabase
+    const { data, error } = await supabase
       .from("pixel_cells")
       .select("id,status,owner_name,city,description,image_url,page_number,created_at")
       .eq("page_number", page)
-      .eq("status", "approved");
+      .in("status", ["approved", "pending", "pending_payment"]);
 
-    const { data: pendingData, error: pendingError } = await supabase
-      .from("pixel_cells")
-      .select("id,status,page_number,created_at")
-      .eq("page_number", page)
-      .in("status", ["pending", "pending_payment"]);
-
-    if (approvedError || pendingError) {
-      console.error(approvedError || pendingError);
+    if (error) {
+      console.error(error);
       alert("صار خطأ أثناء تحميل بيانات الصفحة من Supabase");
       setIsLoadingPage(false);
       return;
@@ -243,25 +256,15 @@ const progressPercent = useMemo(() => {
 
     const nextSoldCells = {};
 
-    for (const row of approvedData || []) {
-      nextSoldCells[row.id] = {
-        status: row.status,
-        ownerName: row.owner_name || "",
-        city: row.city || "",
-        description: row.description || "",
-        imageUrl: row.image_url || "",
-        page: row.page_number,
-        createdAt: row.created_at,
-      };
-    }
+    for (const row of data || []) {
+      const isApproved = row.status === "approved";
 
-    for (const row of pendingData || []) {
       nextSoldCells[row.id] = {
         status: row.status,
-        ownerName: "",
-        city: "",
-        description: "",
-        imageUrl: "",
+        ownerName: isApproved ? row.owner_name || "" : "",
+        city: isApproved ? row.city || "" : "",
+        description: isApproved ? row.description || "" : "",
+        imageUrl: isApproved ? row.image_url || "" : "",
         page: row.page_number,
         createdAt: row.created_at,
       };
@@ -295,10 +298,10 @@ const progressPercent = useMemo(() => {
       ownerName: "",
       city: "",
       description: "",
-      imagePreviewUrl: "",
-      file: null,
       buyerEmail: "",
       buyerPhone: "",
+      imagePreviewUrl: "",
+      file: null,
     });
   }
 
@@ -313,8 +316,13 @@ const progressPercent = useMemo(() => {
       return;
     }
 
-    if (cellData?.status === "pending" || cellData?.status === "pending_payment") {
-      alert("هذا المربع محجوز وينتظر الدفع أو موافقة الإدارة.");
+    if (cellData?.status === "pending") {
+      alert("هذا المربع محجوز وينتظر موافقة الإدارة.");
+      return;
+    }
+
+    if (cellData?.status === "pending_payment") {
+      alert("هذا المربع محجوز وينتظر تأكيد الدفع.");
       return;
     }
 
@@ -366,18 +374,18 @@ const progressPercent = useMemo(() => {
       return;
     }
 
-    if (!buyCell.file) {
-      alert("ارفع صورتك");
-      return;
-    }
-
     if (!buyCell.buyerEmail.trim()) {
-      alert("اكتب الإيميل لإتمام الدفع");
+      alert("اكتب البريد الإلكتروني");
       return;
     }
 
     if (!buyCell.buyerPhone.trim()) {
       alert("اكتب رقم الهاتف");
+      return;
+    }
+
+    if (!buyCell.file) {
+      alert("ارفع صورة");
       return;
     }
 
@@ -418,24 +426,10 @@ const progressPercent = useMemo(() => {
         throw new Error("لم يرجع رابط الدفع من Togo");
       }
 
-      setSoldCells((prev) => ({
-        ...prev,
-        [cellId]: {
-          status: "pending_payment",
-          ownerName: "",
-          city: "",
-          description: "",
-          imageUrl: "",
-          page: pageNumber,
-          createdAt: new Date().toISOString(),
-        },
-      }));
-
       window.location.href = data.paymentUrl;
     } catch (error) {
       console.error(error);
       alert(error.message || "صار خطأ أثناء إنشاء طلب الدفع");
-    } finally {
       setIsSaving(false);
     }
   }
@@ -445,9 +439,10 @@ const progressPercent = useMemo(() => {
 
     setCurrentPage(safePage);
     setPageInput(String(safePage));
+    setMobilePanel(null);
 
     requestAnimationFrame(() => {
-      canvasRef.current?.reset();
+      canvasRef.current?.reset?.();
     });
   }
 
@@ -462,7 +457,7 @@ const progressPercent = useMemo(() => {
       }
     }
 
-    alert("هذه الصفحة ممتلئة أو بانتظار موافقات");
+    alert("هذه الصفحة ممتلئة");
   }
 
   function handleSearchCell(e) {
@@ -471,7 +466,7 @@ const progressPercent = useMemo(() => {
     const cellId = Number(cellSearch);
 
     if (!cellId || cellId < 1 || cellId > TOTAL_CELLS) {
-      alert(`اكتب رقم مربع من 1 إلى ${TOTAL_CELLS}`);
+      alert(`اكتب رقم مربع من 1 إلى ${TOTAL_CELLS.toLocaleString("en-US")}`);
       return;
     }
 
@@ -479,157 +474,102 @@ const progressPercent = useMemo(() => {
 
     setCurrentPage(targetPage);
     setPageInput(String(targetPage));
+    setMobilePanel(null);
 
-    requestAnimationFrame(() => {
-      canvasRef.current?.goToCell(cellId);
-    });
+    setTimeout(() => {
+      canvasRef.current?.goToCell?.(cellId);
+    }, 80);
   }
 
   return (
     <main className="appShell">
       <div className="mobileTopCounter">
-  <span>المليون مربع</span>
+        <span>المليون مربع</span>
 
-  <strong>
-    {totalApprovedCount.toLocaleString("en-US")} / {TOTAL_CELLS.toLocaleString("en-US")}
-  </strong>
+        <strong>
+          {totalApprovedCount.toLocaleString("en-US")} / {TOTAL_CELLS.toLocaleString("en-US")}
+        </strong>
 
-  <div>
-    <b style={{ width: `${progressPercent}%` }} />
-  </div>
-</div>
+        <div>
+          <b style={{ width: `${progressPercent}%` }} />
+        </div>
+      </div>
 
-<div className="mobileBottomDock">
-  <button type="button" onClick={reserveFirstEmpty}>
-    ＋
-    <span>حجز</span>
-  </button>
+      <div className="mobileBottomDock">
+        <button type="button" onClick={reserveFirstEmpty}>
+          ＋
+          <span>حجز</span>
+        </button>
 
-  <button
-    type="button"
-    onClick={() => goToPage(currentPage - 1)}
-    disabled={currentPage === 1}
-  >
-    ‹
-    <span>السابق</span>
-  </button>
+        <button
+          type="button"
+          onClick={() => goToPage(currentPage - 1)}
+          disabled={currentPage === 1}
+        >
+          ‹
+          <span>السابق</span>
+        </button>
 
-  <button type="button" onClick={() => setMobilePanel("page")}>
-    {currentPage}
-    <span>صفحة</span>
-  </button>
+        <button type="button" onClick={() => setMobilePanel("page")}>
+          {currentPage}
+          <span>صفحة</span>
+        </button>
 
-  <button
-    type="button"
-    onClick={() => goToPage(currentPage + 1)}
-    disabled={currentPage === TOTAL_PAGES}
-  >
-    ›
-    <span>التالي</span>
-  </button>
+        <button
+          type="button"
+          onClick={() => goToPage(currentPage + 1)}
+          disabled={currentPage === TOTAL_PAGES}
+        >
+          ›
+          <span>التالي</span>
+        </button>
 
-  <button type="button" onClick={() => setMobilePanel("search")}>
-    🔎
-    <span>بحث</span>
-  </button>
+        <button type="button" onClick={() => setMobilePanel("search")}>
+          🔎
+          <span>بحث</span>
+        </button>
 
-  <a href="#admin">
-    ⚙
-    <span>مدير</span>
-  </a>
-</div>
+        <a href="#admin">
+          ⚙
+          <span>مدير</span>
+        </a>
+      </div>
+
       <aside className="sidebar">
         <div className="brand">
           <span className="logoBox"></span>
-<div className="mobileTopBar">
-  <div className="mobileProgressMini">
-    <span>المليون مربع</span>
 
-    <strong>
-      {totalApprovedCount.toLocaleString("en-US")} / {TOTAL_CELLS.toLocaleString("en-US")}
-    </strong>
-
-    <div className="mobileProgressTrack">
-      <div
-        className="mobileProgressFill"
-        style={{
-          width: `${progressPercent}%`,
-        }}
-      />
-    </div>
-  </div>
-
-  <div className="mobilePriceMini">
-    <span>السعر</span>
-    <strong>{PRICE} شيكل</strong>
-  </div>
-</div>
-
-<div className="mobileActionRail">
-  <button
-    type="button"
-    onClick={reserveFirstEmpty}
-    aria-label="شراء مربع"
-  >
-    ＋
-    <span>شراء</span>
-  </button>
-
-  <button
-    type="button"
-    onClick={() => setMobilePanel("page")}
-    aria-label="تغيير الصفحة"
-  >
-    ١
-    <span>صفحة</span>
-  </button>
-
-  <button
-    type="button"
-    onClick={() => setMobilePanel("search")}
-    aria-label="بحث عن مربع"
-  >
-    🔎
-    <span>بحث</span>
-  </button>
-
-  <a href="#admin" aria-label="دخول المدير">
-    ⚙
-    <span>مدير</span>
-  </a>
-</div>
           <div>
             <h1>مليون مربع فلسطيني</h1>
             <p>كل مربع له صاحب، صورة، قصة، ومكان ثابت على اللوحة.</p>
           </div>
         </div>
 
-          <div className="millionProgressCard">
-  <div className="progressTop">
-    <span>عدد المربعات من المليون</span>
-    <strong>
-      {totalApprovedCount.toLocaleString("en-US")} / {TOTAL_CELLS.toLocaleString("en-US")}
-    </strong>
-  </div>
+        <div className="millionProgressCard">
+          <div className="progressTop">
+            <span>عدد المربعات من المليون</span>
 
-  <div className="progressTrack">
-    <div
-      className="progressFill"
-      style={{
-        width: `${Math.min(100, (totalApprovedCount / TOTAL_CELLS) * 100)}%`,
-      }}
-    />
-  </div>
+            <strong>
+              {totalApprovedCount.toLocaleString("en-US")} / {TOTAL_CELLS.toLocaleString("en-US")}
+            </strong>
+          </div>
 
-  <p>
-    كل مربع يتم اعتماده يضيف اسماً جديداً إلى اللوحة.
-  </p>
-</div>
+          <div className="progressTrack">
+            <div
+              className="progressFill"
+              style={{
+                width: `${progressPercent}%`,
+              }}
+            />
+          </div>
 
-<div className="priceGoldCard">
-  <span>سعر المربع</span>
-  <strong>{PRICE} شيكل</strong>
-</div>
+          <p>كل مربع يتم اعتماده يضيف اسماً جديداً إلى اللوحة.</p>
+        </div>
+
+        <div className="priceGoldCard">
+          <span>سعر المربع</span>
+          <strong>{PRICE} شيكل</strong>
+        </div>
 
         <button className="primaryBtn" onClick={reserveFirstEmpty}>
           احجز أول مربع فارغ
@@ -667,6 +607,14 @@ const progressPercent = useMemo(() => {
           </button>
         </div>
 
+        <div className="sidebarBottomBox">
+          <a className="adminLink" href="#admin">
+            دخول المدير
+          </a>
+
+          <p>اسحب اللوحة بالماوس. استخدم عجلة الماوس للتكبير والتصغير.</p>
+        </div>
+
         <form className="searchBox" onSubmit={handleSearchCell}>
           <label>اذهب إلى رقم مربع</label>
 
@@ -681,31 +629,31 @@ const progressPercent = useMemo(() => {
             />
           </div>
         </form>
-
-        <div className="sidebarBottomBox">
-  <a className="adminLink" href="#admin">
-    دخول المدير
-  </a>
-
-  <p>
-    اسحب اللوحة بالماوس. استخدم عجلة الماوس للتكبير والتصغير.
-  </p>
-</div>
-          
       </aside>
 
       <section className="boardSection">
         <header className="boardHeader">
           <div>
             <h2>لوحة رقم {currentPage}</h2>
-            <p>الأرقام تصاعدية من اليمين إلى اليسار.</p>
+            <p>
+              الأرقام تصاعدية من اليمين إلى اليسار. المحجوز يظهر بدون بيانات حتى الموافقة.
+            </p>
           </div>
 
           <div className="toolbar">
-            <button onClick={() => canvasRef.current?.zoomIn()}>+</button>
+            <button type="button" onClick={() => canvasRef.current?.zoomIn?.()}>
+              +
+            </button>
+
             <span>{zoomPercent}%</span>
-            <button onClick={() => canvasRef.current?.zoomOut()}>-</button>
-            <button onClick={() => canvasRef.current?.reset()}>البداية</button>
+
+            <button type="button" onClick={() => canvasRef.current?.zoomOut?.()}>
+              -
+            </button>
+
+            <button type="button" onClick={() => canvasRef.current?.reset?.()}>
+              البداية
+            </button>
           </div>
         </header>
 
@@ -719,160 +667,65 @@ const progressPercent = useMemo(() => {
           }}
         />
       </section>
-{mobilePanel && (
-  <div className="mobileSheetOverlay" onClick={() => setMobilePanel(null)}>
-    <div className="mobileSheet" onClick={(e) => e.stopPropagation()}>
-      <button
-        type="button"
-        className="mobileSheetClose"
-        onClick={() => setMobilePanel(null)}
-      >
-        ×
-      </button>
 
-      {mobilePanel === "page" && (
-        <>
-          <h3>تغيير الصفحة</h3>
-
-          <div className="mobilePageControls">
+      {mobilePanel && (
+        <div className="mobileSheetOverlay" onClick={() => setMobilePanel(null)}>
+          <div className="mobileSheet" onClick={(e) => e.stopPropagation()}>
             <button
               type="button"
-              onClick={() => {
-                goToPage(currentPage - 1);
-                setMobilePanel(null);
-              }}
-              disabled={currentPage === 1}
+              className="mobileSheetClose"
+              onClick={() => setMobilePanel(null)}
             >
-              السابق
+              ×
             </button>
 
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                goToPage(pageInput);
-                setMobilePanel(null);
-              }}
-            >
-              <label>رقم الصفحة</label>
+            {mobilePanel === "page" && (
+              <>
+                <h3>تغيير الصفحة</h3>
 
-              <div>
-                <input
-                  value={pageInput}
-                  onChange={(e) => setPageInput(e.target.value)}
-                  inputMode="numeric"
-                />
+                <form
+                  className="mobileSearchForm"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    goToPage(pageInput);
+                  }}
+                >
+                  <label>رقم الصفحة</label>
 
-                <span>/ {TOTAL_PAGES}</span>
-              </div>
+                  <input
+                    value={pageInput}
+                    onChange={(e) => setPageInput(e.target.value)}
+                    inputMode="numeric"
+                    placeholder="مثلاً 2"
+                  />
 
-              <button type="submit">اذهب</button>
-            </form>
+                  <button type="submit">اذهب إلى الصفحة</button>
+                </form>
+              </>
+            )}
 
-            <button
-              type="button"
-              onClick={() => {
-                goToPage(currentPage + 1);
-                setMobilePanel(null);
-              }}
-              disabled={currentPage === TOTAL_PAGES}
-            >
-              التالي
-            </button>
+            {mobilePanel === "search" && (
+              <>
+                <h3>البحث عن مربع</h3>
+
+                <form className="mobileSearchForm" onSubmit={handleSearchCell}>
+                  <label>رقم المربع</label>
+
+                  <input
+                    value={cellSearch}
+                    onChange={(e) => setCellSearch(e.target.value)}
+                    placeholder="مثلاً 12500"
+                    inputMode="numeric"
+                  />
+
+                  <button type="submit">اذهب إلى المربع</button>
+                </form>
+              </>
+            )}
           </div>
-        </>
+        </div>
       )}
 
-      {mobilePanel === "search" && (
-        <>
-          <h3>البحث عن مربع</h3>
-
-          <form
-            className="mobileSearchForm"
-            onSubmit={(e) => {
-              handleSearchCell(e);
-              setMobilePanel(null);
-            }}
-          >
-            <label>اكتب رقم المربع</label>
-
-            <input
-              value={cellSearch}
-              onChange={(e) => setCellSearch(e.target.value)}
-              placeholder="مثلاً 12500"
-              inputMode="numeric"
-            />
-
-            <button type="submit">اذهب إلى المربع</button>
-          </form>
-        </>
-      )}
-    </div>
-  </div>
-)}
-{mobilePanel && (
-  <div className="mobileSheetOverlay" onClick={() => setMobilePanel(null)}>
-    <div className="mobileSheet" onClick={(e) => e.stopPropagation()}>
-      <button
-        type="button"
-        className="mobileSheetClose"
-        onClick={() => setMobilePanel(null)}
-      >
-        ×
-      </button>
-
-      {mobilePanel === "page" && (
-        <>
-          <h3>تغيير الصفحة</h3>
-
-          <form
-            className="mobileSearchForm"
-            onSubmit={(e) => {
-              e.preventDefault();
-              goToPage(pageInput);
-              setMobilePanel(null);
-            }}
-          >
-            <label>رقم الصفحة</label>
-
-            <input
-              value={pageInput}
-              onChange={(e) => setPageInput(e.target.value)}
-              inputMode="numeric"
-              placeholder="مثلاً 2"
-            />
-
-            <button type="submit">اذهب إلى الصفحة</button>
-          </form>
-        </>
-      )}
-
-      {mobilePanel === "search" && (
-        <>
-          <h3>البحث عن مربع</h3>
-
-          <form
-            className="mobileSearchForm"
-            onSubmit={(e) => {
-              handleSearchCell(e);
-              setMobilePanel(null);
-            }}
-          >
-            <label>رقم المربع</label>
-
-            <input
-              value={cellSearch}
-              onChange={(e) => setCellSearch(e.target.value)}
-              placeholder="مثلاً 12500"
-              inputMode="numeric"
-            />
-
-            <button type="submit">اذهب إلى المربع</button>
-          </form>
-        </>
-      )}
-    </div>
-  </div>
-)}
       {selectedCell && (
         <div className="modalOverlay" onClick={() => setSelectedCell(null)}>
           <div className="modal detailsModal" onClick={(e) => e.stopPropagation()}>
@@ -891,6 +744,8 @@ const progressPercent = useMemo(() => {
             <p className="description">
               {selectedCell.description || "لا يوجد وصف لهذا المربع بعد."}
             </p>
+
+            <p className="dateText">تاريخ الإضافة: {formatDate(selectedCell.createdAt)}</p>
           </div>
         </div>
       )}
@@ -953,35 +808,9 @@ const progressPercent = useMemo(() => {
               }
             />
 
-            <label className="uploadBox">
-              {buyCell.imagePreviewUrl ? (
-                <img src={buyCell.imagePreviewUrl} alt="preview" />
-              ) : (
-                <div>
-                  <strong>اضغط لرفع صورتك</strong>
-                  <span>PNG / JPG / WEBP</span>
-                </div>
-              )}
-
-              <input
-                type="file"
-                accept="image/*"
-                hidden
-                disabled={isSaving}
-                onChange={handleImageUpload}
-              />
-            </label>
-
-            <div className="togoBox">
-              <strong>الدفع عبر Togo</strong>
-              <p>
-                بعد الضغط على الزر سيتم تحويلك إلى صفحة الدفع. السعر: {PRICE} شيكل.
-              </p>
-            </div>
-
             <input
               type="email"
-              placeholder="الإيميل لإتمام الدفع"
+              placeholder="البريد الإلكتروني للدفع"
               value={buyCell.buyerEmail}
               disabled={isSaving}
               onChange={(e) =>
@@ -1005,8 +834,27 @@ const progressPercent = useMemo(() => {
               }
             />
 
+            <label className="uploadBox">
+              {buyCell.imagePreviewUrl ? (
+                <img src={buyCell.imagePreviewUrl} alt="preview" />
+              ) : (
+                <div>
+                  <strong>اضغط لرفع الصورة</strong>
+                  <span>JPG / PNG / WEBP</span>
+                </div>
+              )}
+
+              <input
+                type="file"
+                accept="image/*"
+                hidden
+                disabled={isSaving}
+                onChange={handleImageUpload}
+              />
+            </label>
+
             <button className="buyBtn" type="submit" disabled={isSaving}>
-              {isSaving ? "جاري تجهيز الدفع، لا تغلق الصفحة..." : "ادفع الآن عبر Togo"}
+              {isSaving ? "جاري تجهيز الدفع..." : `ادفع ${PRICE} شيكل عبر Togo`}
             </button>
           </form>
         </div>
@@ -1051,6 +899,7 @@ function AdminPage() {
 
   useEffect(() => {
     if (!session) return;
+
     loadAdminData(statusFilter);
   }, [session, statusFilter]);
 
@@ -1065,7 +914,8 @@ function AdminPage() {
         String(item.owner_name || "").toLowerCase().includes(search) ||
         String(item.city || "").toLowerCase().includes(search) ||
         String(item.description || "").toLowerCase().includes(search) ||
-        String(item.payment_method || "").toLowerCase().includes(search)
+        String(item.buyer_email || "").toLowerCase().includes(search) ||
+        String(item.buyer_phone || "").toLowerCase().includes(search)
       );
     });
   }, [requests, adminSearch]);
@@ -1075,7 +925,7 @@ function AdminPage() {
     setLoginError("");
 
     if (!ADMIN_EMAIL) {
-      setLoginError("لازم تضيف VITE_ADMIN_EMAIL داخل ملف .env");
+      setLoginError("لازم تضيف VITE_ADMIN_EMAIL داخل ملف .env.local");
       return;
     }
 
@@ -1115,6 +965,7 @@ function AdminPage() {
 
   async function loadCounts() {
     const statuses = ["pending_payment", "pending", "approved", "rejected"];
+
     const nextCounts = {
       pending_payment: 0,
       pending: 0,
@@ -1155,7 +1006,7 @@ function AdminPage() {
 
     if (error) {
       console.error(error);
-      alert("صار خطأ أثناء تحميل طلبات المدير. تأكد من SQL والصلاحيات.");
+      alert("صار خطأ أثناء تحميل طلبات المدير.");
       setIsLoading(false);
       return;
     }
@@ -1166,11 +1017,7 @@ function AdminPage() {
   }
 
   async function confirmPayment(item) {
-    const ok = window.confirm(
-      `تأكيد أن دفع Togo تم للمربع #${item.id}؟\nاستخدم هذا الزر فقط بعد التأكد من لوحة Togo.`
-    );
-
-    if (!ok) return;
+    if (!window.confirm(`تأكيد الدفع للمربع #${item.id}؟`)) return;
 
     setBusyId(item.id);
 
@@ -1194,11 +1041,7 @@ function AdminPage() {
   }
 
   async function approveRequest(item) {
-    const ok = window.confirm(
-      `الموافقة على مربع #${item.id} باسم ${item.owner_name || "بدون اسم"}؟`
-    );
-
-    if (!ok) return;
+    if (!window.confirm(`الموافقة على ظهور المربع #${item.id}؟`)) return;
 
     setBusyId(item.id);
 
@@ -1213,7 +1056,7 @@ function AdminPage() {
 
     if (error) {
       console.error(error);
-      alert("فشلت الموافقة على الطلب");
+      alert("فشل قبول الطلب");
       return;
     }
 
@@ -1221,38 +1064,14 @@ function AdminPage() {
   }
 
   async function rejectRequest(item) {
-    const ok = window.confirm(
-      `رفض الطلب وحذف مربع #${item.id}؟\nبعد الحذف يصبح المربع متاحاً للحجز مرة ثانية.`
-    );
-
-    if (!ok) return;
-
-    setBusyId(item.id);
-
-    const { error } = await supabase.from("pixel_cells").delete().eq("id", item.id);
-
-    setBusyId(null);
-
-    if (error) {
-      console.error(error);
-      alert("فشل رفض/حذف الطلب");
-      return;
-    }
-
-    await loadAdminData(statusFilter);
-  }
-
-  async function returnToPendingPayment(item) {
-    const ok = window.confirm(`إرجاع مربع #${item.id} إلى بانتظار الدفع؟`);
-    if (!ok) return;
+    if (!window.confirm(`رفض الطلب للمربع #${item.id}؟`)) return;
 
     setBusyId(item.id);
 
     const { error } = await supabase
       .from("pixel_cells")
       .update({
-        status: "pending_payment",
-        payment_confirmed_at: null,
+        status: "rejected",
       })
       .eq("id", item.id);
 
@@ -1260,7 +1079,28 @@ function AdminPage() {
 
     if (error) {
       console.error(error);
-      alert("فشلت العملية");
+      alert("فشل رفض الطلب");
+      return;
+    }
+
+    await loadAdminData(statusFilter);
+  }
+
+  async function deleteRequest(item) {
+    if (!window.confirm(`حذف الطلب وإفراغ المربع #${item.id}؟`)) return;
+
+    setBusyId(item.id);
+
+    const { error } = await supabase
+      .from("pixel_cells")
+      .delete()
+      .eq("id", item.id);
+
+    setBusyId(null);
+
+    if (error) {
+      console.error(error);
+      alert("فشل حذف الطلب");
       return;
     }
 
@@ -1271,10 +1111,13 @@ function AdminPage() {
     return (
       <main className="adminLoginPage">
         <form className="adminLoginCard" onSubmit={handleLogin}>
-          <div className="adminLoginLogo">■</div>
+          <a className="backHome" href="#">
+            الرجوع للوحة
+          </a>
 
           <h1>دخول المدير</h1>
-          <p>أدخل اسم المستخدم وكلمة السر لمراجعة طلبات Togo والصور.</p>
+
+          <p>هذه الصفحة مخصصة لإدارة الطلبات وتأكيد الدفع والموافقة على الصور.</p>
 
           <label>
             اسم المستخدم
@@ -1295,37 +1138,32 @@ function AdminPage() {
             />
           </label>
 
-          {loginError && <div className="adminError">{loginError}</div>}
+          {loginError && <div className="loginError">{loginError}</div>}
 
           <button type="submit" disabled={isLoggingIn}>
             {isLoggingIn ? "جاري الدخول..." : "دخول"}
           </button>
-
-          <a href="#" className="backToSite">
-            الرجوع للموقع
-          </a>
         </form>
       </main>
     );
   }
 
-  const totalAll =
-    counts.pending_payment + counts.pending + counts.approved + counts.rejected;
-
   return (
     <main className="adminPage">
-      <header className="adminHeader">
+      <header className="adminTop">
         <div>
+          <a className="backHome" href="#">
+            الرجوع للوحة
+          </a>
+
           <h1>لوحة المدير</h1>
-          <p>
-            طلبات Togo تظهر أولاً بانتظار الدفع، ثم تراجع الصورة، وبعد الموافقة تظهر للزوار.
-          </p>
+
+          <p>إدارة طلبات المربعات، تأكيد الدفع، والموافقة على ظهور الصور.</p>
         </div>
 
-        <div className="adminHeaderActions">
-          <a href="#">عرض الموقع</a>
-          <button onClick={handleLogout}>تسجيل خروج</button>
-        </div>
+        <button className="logoutBtn" onClick={handleLogout}>
+          تسجيل خروج
+        </button>
       </header>
 
       <section className="adminStats">
@@ -1333,7 +1171,7 @@ function AdminPage() {
           className={statusFilter === "pending_payment" ? "active" : ""}
           onClick={() => setStatusFilter("pending_payment")}
         >
-          <strong>{counts.pending_payment.toLocaleString("ar")}</strong>
+          <strong>{counts.pending_payment}</strong>
           <span>بانتظار الدفع</span>
         </button>
 
@@ -1341,135 +1179,129 @@ function AdminPage() {
           className={statusFilter === "pending" ? "active" : ""}
           onClick={() => setStatusFilter("pending")}
         >
-          <strong>{counts.pending.toLocaleString("ar")}</strong>
-          <span>قيد مراجعة الصورة</span>
+          <strong>{counts.pending}</strong>
+          <span>قيد المراجعة</span>
         </button>
 
         <button
           className={statusFilter === "approved" ? "active" : ""}
           onClick={() => setStatusFilter("approved")}
         >
-          <strong>{counts.approved.toLocaleString("ar")}</strong>
-          <span>موافق عليه</span>
+          <strong>{counts.approved}</strong>
+          <span>مقبول</span>
         </button>
 
         <button
-          className={statusFilter === "all" ? "active" : ""}
-          onClick={() => setStatusFilter("all")}
+          className={statusFilter === "rejected" ? "active" : ""}
+          onClick={() => setStatusFilter("rejected")}
         >
-          <strong>{totalAll.toLocaleString("ar")}</strong>
-          <span>الكل</span>
+          <strong>{counts.rejected}</strong>
+          <span>مرفوض</span>
         </button>
       </section>
 
-      <section className="adminTools">
-        <div>
-          <label>بحث</label>
-          <input
-            value={adminSearch}
-            onChange={(e) => setAdminSearch(e.target.value)}
-            placeholder="ابحث بالاسم، المدينة، رقم المربع، أو طريقة الدفع"
-          />
-        </div>
+      <section className="adminControls">
+        <input
+          value={adminSearch}
+          onChange={(e) => setAdminSearch(e.target.value)}
+          placeholder="بحث بالاسم أو رقم المربع أو المدينة"
+        />
+
+        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+          <option value="pending_payment">بانتظار الدفع</option>
+          <option value="pending">قيد المراجعة</option>
+          <option value="approved">موافق عليه</option>
+          <option value="rejected">مرفوض</option>
+          <option value="all">كل الطلبات</option>
+        </select>
 
         <button onClick={() => loadAdminData(statusFilter)} disabled={isLoading}>
-          {isLoading ? "جاري التحديث..." : "تحديث الطلبات"}
+          {isLoading ? "جاري التحميل..." : "تحديث"}
         </button>
       </section>
 
-      {isLoading ? (
-        <div className="adminEmpty">جاري تحميل الطلبات...</div>
-      ) : filteredRequests.length === 0 ? (
-        <div className="adminEmpty">لا توجد طلبات في هذا القسم حالياً.</div>
-      ) : (
-        <section className="requestsGrid">
-          {filteredRequests.map((item) => (
-            <article key={item.id} className="requestCard">
-              <div className="requestImageWrap">
-                {item.image_url ? (
-                  <img src={item.image_url} alt={item.owner_name || ""} />
-                ) : (
-                  <span>لا توجد صورة</span>
-                )}
+      <section className="requestsGrid">
+        {filteredRequests.length === 0 && (
+          <div className="emptyRequests">
+            {isLoading ? "جاري تحميل الطلبات..." : "لا توجد طلبات حالياً"}
+          </div>
+        )}
 
-                <b className={`statusBadge ${item.status}`}>
-                  {getStatusLabel(item.status)}
-                </b>
+        {filteredRequests.map((item) => (
+          <article key={item.id} className="requestCard">
+            <div className="requestImageWrap">
+              {item.image_url ? (
+                <img src={item.image_url} alt={item.owner_name || "request"} />
+              ) : (
+                <span>لا توجد صورة</span>
+              )}
+
+              <span className={`statusPill ${getStatusClass(item.status)}`}>
+                {getStatusLabel(item.status)}
+              </span>
+            </div>
+
+            <div className="requestBody">
+              <div className="requestTitle">
+                <h2>{item.owner_name || "بدون اسم"}</h2>
+                <strong>#{item.id}</strong>
               </div>
 
-              <div className="requestBody">
-                <div className="requestTitle">
-                  <h2>{item.owner_name || "بدون اسم"}</h2>
-                  <strong>#{item.id}</strong>
-                </div>
+              <p>الصفحة: {item.page_number || getPageFromCellId(item.id)}</p>
+              <p>المدينة: {item.city || "غير محددة"}</p>
+              <p>الوصف: {item.description || "لا يوجد وصف"}</p>
+              <p>تاريخ الطلب: {formatDate(item.created_at)}</p>
 
-                <p className="requestMeta">
-                  صفحة {item.page_number} — صف {Number(item.row_index) + 1} — عمود{" "}
-                  {Number(item.col_index) + 1}
-                </p>
+              {item.payment_confirmed_at && (
+                <p>تأكيد الدفع: {formatDate(item.payment_confirmed_at)}</p>
+              )}
 
-                <p className="requestMeta">📍 {item.city || "لم يحدد المدينة"}</p>
+              {item.buyer_email && <p>الإيميل: {item.buyer_email}</p>}
+              {item.buyer_phone && <p>الهاتف: {item.buyer_phone}</p>}
 
-                <p className="requestMeta">
-                  طريقة الدفع: {getPaymentMethodLabel(item.payment_method)}
-                </p>
-
-                <p className="requestMeta">المبلغ: {Number(item.price || PRICE)} شيكل</p>
-
-                <p className="requestDesc">{item.description || "لا يوجد وصف."}</p>
-
-                <p className="requestDate">أُرسل في: {formatDate(item.created_at)}</p>
-
-                {item.payment_confirmed_at && (
-                  <p className="requestDate">
-                    تم تأكيد الدفع: {formatDate(item.payment_confirmed_at)}
-                  </p>
+              <div className="requestActions">
+                {item.status === "pending_payment" && (
+                  <button
+                    className="paymentBtn"
+                    disabled={busyId === item.id}
+                    onClick={() => confirmPayment(item)}
+                  >
+                    {busyId === item.id ? "..." : "تأكيد الدفع"}
+                  </button>
                 )}
 
-                <div className="requestActions">
-                  {item.status === "pending_payment" && (
-                    <button
-                      className="paymentBtn"
-                      disabled={busyId === item.id}
-                      onClick={() => confirmPayment(item)}
-                    >
-                      {busyId === item.id ? "..." : "تأكيد الدفع"}
-                    </button>
-                  )}
+                {item.status === "pending" && (
+                  <button
+                    className="approveBtn"
+                    disabled={busyId === item.id}
+                    onClick={() => approveRequest(item)}
+                  >
+                    {busyId === item.id ? "..." : "موافقة"}
+                  </button>
+                )}
 
-                  {item.status === "pending" && (
-                    <button
-                      className="approveBtn"
-                      disabled={busyId === item.id}
-                      onClick={() => approveRequest(item)}
-                    >
-                      {busyId === item.id ? "..." : "موافقة"}
-                    </button>
-                  )}
-
-                  {item.status !== "pending_payment" && (
-                    <button
-                      className="pendingBtn"
-                      disabled={busyId === item.id}
-                      onClick={() => returnToPendingPayment(item)}
-                    >
-                      إرجاع للدفع
-                    </button>
-                  )}
-
+                {item.status !== "approved" && (
                   <button
                     className="rejectBtn"
                     disabled={busyId === item.id}
                     onClick={() => rejectRequest(item)}
                   >
-                    رفض وحذف
+                    رفض
                   </button>
-                </div>
+                )}
+
+                <button
+                  className="deleteBtn"
+                  disabled={busyId === item.id}
+                  onClick={() => deleteRequest(item)}
+                >
+                  حذف وإفراغ
+                </button>
               </div>
-            </article>
-          ))}
-        </section>
-      )}
+            </div>
+          </article>
+        ))}
+      </section>
     </main>
   );
 }
