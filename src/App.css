@@ -1520,4 +1520,57 @@ button {
   .pageBox button {
     width: 100%;
   }
+}/* رفع صندوق دخول المدير ومنع قص الكلام */
+.sidebarBottomBox {
+  padding: 14px 16px !important;
+  gap: 6px !important;
+  margin-top: -4px !important;
+  margin-bottom: 18px !important;
+  border-radius: 20px !important;
+}
+
+.sidebarBottomBox .adminLink {
+  font-size: 16px !important;
+  line-height: 1.2 !important;
+  padding: 0 !important;
+}
+
+.sidebarBottomBox p {
+  font-size: 12px !important;
+  line-height: 1.6 !important;
+  max-width: 100%;
+}
+
+/* نخلي القائمة الجانبية تسمح بالنزول لو الشاشة قصيرة */
+.sidebar {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  scrollbar-width: thin;
+  padding-bottom: 18px !important;
+}
+
+/* تقليل المسافات شوي حتى كل العناصر تركب بدون ضغط */
+.sidebar {
+  gap: 12px !important;
+}
+
+.millionProgressCard {
+  padding: 14px !important;
+}
+
+.priceGoldCard {
+  padding: 16px !important;
+}
+
+.primaryBtn {
+  min-height: 52px !important;
+}
+
+.pageBox {
+  padding: 12px !important;
+}
+
+.searchBox input,
+.searchBox button {
+  height: 48px !important;
 }
