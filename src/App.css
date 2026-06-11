@@ -1748,4 +1748,334 @@ button {
 .boardSection canvas {
   touch-action: none;
   overscroll-behavior: contain;
+}/* =========================
+   Mobile board redesign
+   Desktop stays unchanged
+========================= */
+
+.mobileTopBar,
+.mobileActionRail,
+.mobileSheetOverlay {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  html,
+  body,
+  #root {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .appShell {
+    position: relative;
+    height: 100svh !important;
+    min-height: 100svh !important;
+    width: 100vw !important;
+    padding: 10px !important;
+    display: block !important;
+    overflow: hidden !important;
+    background: #f5f0e8;
+  }
+
+  .sidebar {
+    display: none !important;
+  }
+
+  .boardSection {
+    width: 100% !important;
+    height: calc(100svh - 20px) !important;
+    min-height: 0 !important;
+    border-radius: 26px !important;
+    overflow: hidden !important;
+    position: relative !important;
+  }
+
+  .boardHeader {
+    position: absolute !important;
+    top: 92px !important;
+    left: 12px !important;
+    right: 12px !important;
+    z-index: 8 !important;
+    padding: 8px 10px !important;
+    border-radius: 18px !important;
+    background: rgba(255, 255, 255, 0.86) !important;
+    backdrop-filter: blur(14px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  }
+
+  .boardHeader h2 {
+    font-size: 16px !important;
+    margin: 0 !important;
+  }
+
+  .boardHeader p {
+    display: none !important;
+  }
+
+  .toolbar {
+    gap: 5px !important;
+  }
+
+  .toolbar button {
+    width: 36px !important;
+    height: 34px !important;
+    border-radius: 12px !important;
+    font-size: 12px !important;
+  }
+
+  .toolbar span {
+    min-width: 42px !important;
+    font-size: 12px !important;
+  }
+
+  .mobileTopBar {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    position: absolute;
+    top: 18px;
+    left: 18px;
+    right: 18px;
+    z-index: 20;
+    direction: rtl;
+  }
+
+  .mobileProgressMini {
+    display: grid;
+    gap: 5px;
+    padding: 10px 12px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(231, 223, 211, 0.95);
+    box-shadow: 0 12px 34px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(14px);
+  }
+
+  .mobileProgressMini span {
+    color: #475569;
+    font-size: 11px;
+    font-weight: 900;
+  }
+
+  .mobileProgressMini strong {
+    color: #0f172a;
+    font-size: 14px;
+    font-weight: 950;
+    direction: ltr;
+    text-align: right;
+  }
+
+  .mobileProgressTrack {
+    height: 7px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #eee7dc;
+  }
+
+  .mobileProgressFill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #16a34a, #22c55e, #a3e635);
+  }
+
+  .mobilePriceMini {
+    min-width: 82px;
+    display: grid;
+    place-items: center;
+    padding: 9px 10px;
+    border-radius: 18px;
+    background:
+      radial-gradient(circle at top left, rgba(255, 255, 255, 0.55), transparent 38%),
+      linear-gradient(135deg, #facc15, #d97706, #92400e);
+    color: #fff;
+    border: 1px solid #facc15;
+    box-shadow: 0 12px 34px rgba(217, 119, 6, 0.25);
+  }
+
+  .mobilePriceMini span {
+    font-size: 10px;
+    font-weight: 900;
+    opacity: 0.92;
+  }
+
+  .mobilePriceMini strong {
+    font-size: 15px;
+    font-weight: 950;
+    color: #fffbe6;
+    white-space: nowrap;
+  }
+
+  .mobileActionRail {
+    display: grid;
+    gap: 9px;
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 30;
+    direction: rtl;
+  }
+
+  .mobileActionRail button,
+  .mobileActionRail a {
+    width: 54px;
+    min-height: 54px;
+    display: grid;
+    place-items: center;
+    gap: 2px;
+    padding: 6px;
+    border: 0;
+    border-radius: 18px;
+    text-decoration: none;
+    background: rgba(8, 18, 15, 0.9);
+    color: #fff;
+    font-size: 18px;
+    font-weight: 950;
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.22);
+    backdrop-filter: blur(12px);
+  }
+
+  .mobileActionRail button:first-child {
+    background: #00c985;
+    color: #04130d;
+  }
+
+  .mobileActionRail span {
+    font-size: 10px;
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  .mobileSheetOverlay {
+    display: grid;
+    place-items: end center;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.28);
+    padding: 14px;
+    direction: rtl;
+  }
+
+  .mobileSheet {
+    position: relative;
+    width: min(460px, 100%);
+    padding: 22px 18px 18px;
+    border-radius: 26px;
+    background: #fff;
+    border: 1px solid #e7dfd3;
+    box-shadow: 0 -18px 70px rgba(0, 0, 0, 0.18);
+  }
+
+  .mobileSheetClose {
+    position: absolute;
+    top: 10px;
+    left: 12px;
+    width: 34px;
+    height: 34px;
+    border: 0;
+    border-radius: 50%;
+    background: #111;
+    color: #fff;
+    font-size: 22px;
+    font-weight: 900;
+  }
+
+  .mobileSheet h3 {
+    margin: 0 0 16px;
+    color: #111827;
+    font-size: 22px;
+    font-weight: 950;
+    text-align: center;
+  }
+
+  .mobilePageControls {
+    display: grid;
+    gap: 12px;
+  }
+
+  .mobilePageControls > button,
+  .mobilePageControls form button,
+  .mobileSearchForm button {
+    height: 50px;
+    border: 0;
+    border-radius: 16px;
+    background: #00c985;
+    color: #05140d;
+    font-size: 16px;
+    font-weight: 950;
+  }
+
+  .mobilePageControls > button:disabled {
+    opacity: 0.45;
+  }
+
+  .mobilePageControls form {
+    display: grid;
+    gap: 10px;
+    padding: 14px;
+    border-radius: 20px;
+    background: #f8f5ef;
+    border: 1px solid #e7dfd3;
+  }
+
+  .mobilePageControls form label,
+  .mobileSearchForm label {
+    color: #334155;
+    font-size: 13px;
+    font-weight: 900;
+  }
+
+  .mobilePageControls form div {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .mobilePageControls input,
+  .mobileSearchForm input {
+    width: 100%;
+    height: 50px;
+    border: 1px solid #ded8cf;
+    border-radius: 16px;
+    padding: 0 14px;
+    background: #fff;
+    color: #111;
+    font-size: 18px;
+    font-weight: 900;
+    text-align: center;
+  }
+
+  .mobilePageControls form span {
+    color: #111;
+    font-weight: 950;
+    direction: ltr;
+  }
+
+  .mobileSearchForm {
+    display: grid;
+    gap: 12px;
+  }
+
+  .boardSection canvas {
+    touch-action: none !important;
+    user-select: none !important;
+  }
+
+  .modalOverlay {
+    padding: 14px !important;
+  }
+
+  .modal {
+    width: min(440px, 100%) !important;
+    max-height: calc(100svh - 28px) !important;
+    overflow-y: auto !important;
+  }
+}
+
+.boardSection,
+.boardSection canvas {
+  touch-action: none;
+  overscroll-behavior: contain;
 }
