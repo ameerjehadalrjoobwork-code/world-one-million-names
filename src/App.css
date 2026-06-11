@@ -1450,4 +1450,51 @@ a {
     min-width: 42px !important;
     font-size: 12px !important;
   }
+}/* =========================
+   DESKTOP ONLY - Move board header to bottom left
+   نقل شريط اللوحة إلى الشمال تحت على الكمبيوتر فقط
+========================= */
+
+@media (min-width: 769px) and (hover: hover) and (pointer: fine) {
+  .boardHeader {
+    top: auto !important;
+    right: auto !important;
+    left: 18px !important;
+    bottom: 18px !important;
+    width: auto !important;
+    max-width: 620px !important;
+    padding: 8px 10px !important;
+    border-radius: 18px !important;
+    gap: 10px !important;
+  }
+
+  .boardHeader h2 {
+    font-size: 17px !important;
+    line-height: 1.2 !important;
+    margin: 0 !important;
+  }
+
+  .boardHeader p {
+    font-size: 11px !important;
+    line-height: 1.35 !important;
+    margin: 2px 0 0 !important;
+    max-width: 360px !important;
+  }
+
+  .toolbar {
+    gap: 5px !important;
+  }
+
+  .toolbar button {
+    height: 34px !important;
+    min-width: 36px !important;
+    border-radius: 12px !important;
+    font-size: 13px !important;
+    padding: 0 10px !important;
+  }
+
+  .toolbar span {
+    min-width: 42px !important;
+    font-size: 12px !important;
+  }
 }
