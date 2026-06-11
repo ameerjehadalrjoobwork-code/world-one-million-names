@@ -608,46 +608,62 @@ function PublicBoard() {
 
 
         <form className="searchBox" onSubmit={handleSearchCell}>
-          <label>اذهب إلى رقم مربع</label>
+  <label>اذهب إلى رقم مربع</label>
 
-          <div>
-            <button>اذهب</button>
+  <div>
+    <button>اذهب</button>
 
-            <input
-              value={cellSearch}
-              onChange={(e) => setCellSearch(e.target.value)}
-              placeholder="مثلاً 12500"
-              inputMode="numeric"
-            />
-          </div>
-        </form>
+    <input
+      value={cellSearch}
+      onChange={(e) => setCellSearch(e.target.value)}
+      placeholder="مثلاً 12500"
+      inputMode="numeric"
+    />
+  </div>
+</form>
+
+<div className="desktopBoardControls">
+  <label>التحكم باللوحة</label>
+
+  <div className="desktopBoardControlsRow">
+    <button type="button" onClick={() => canvasRef.current?.zoomIn?.()}>
+      +
+    </button>
+
+    <span>{zoomPercent}%</span>
+
+    <button type="button" onClick={() => canvasRef.current?.zoomOut?.()}>
+      -
+    </button>
+
+    <button type="button" onClick={() => canvasRef.current?.reset?.()}>
+      البداية
+    </button>
+  </div>
+</div>
+
       </aside>
 
       <section className="boardSection">
-        <header className="boardHeader">
-          <div>
-            <h2>لوحة رقم {currentPage}</h2>
-            <p>
-              الأرقام تصاعدية من اليمين إلى اليسار. المحجوز يظهر بدون بيانات حتى الموافقة.
-            </p>
-          </div>
+<header className="boardHeader mobileBoardHeader">
+  <div aria-hidden="true" />
 
-          <div className="toolbar">
-            <button type="button" onClick={() => canvasRef.current?.zoomIn?.()}>
-              +
-            </button>
+  <div className="toolbar">
+    <button type="button" onClick={() => canvasRef.current?.zoomIn?.()}>
+      +
+    </button>
 
-            <span>{zoomPercent}%</span>
+    <span>{zoomPercent}%</span>
 
-            <button type="button" onClick={() => canvasRef.current?.zoomOut?.()}>
-              -
-            </button>
+    <button type="button" onClick={() => canvasRef.current?.zoomOut?.()}>
+      -
+    </button>
 
-            <button type="button" onClick={() => canvasRef.current?.reset?.()}>
-              البداية
-            </button>
-          </div>
-        </header>
+    <button type="button" onClick={() => canvasRef.current?.reset?.()}>
+      البداية
+    </button>
+  </div>
+</header>
 
         <PixelCanvas
           ref={canvasRef}

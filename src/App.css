@@ -1613,4 +1613,80 @@ a {
     min-width: 42px !important;
     font-size: 10px !important;
   }
+}/* =========================================================
+   DESKTOP FINAL FIX:
+   إخفاء شريط التحكم من أسفل اللوحة على الكمبيوتر
+   ونقل أزرار الزوم إلى القائمة الجانبية تحت البحث
+========================================================= */
+
+.desktopBoardControls {
+  display: none;
+}
+
+@media (min-width: 769px) and (hover: hover) and (pointer: fine) {
+  .boardHeader,
+  .mobileBoardHeader {
+    display: none !important;
+  }
+
+  .desktopBoardControls {
+    display: grid !important;
+    gap: 9px;
+    padding: 12px;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .desktopBoardControls label {
+    color: #d8fff0;
+    font-size: 13px;
+    font-weight: 950;
+    text-align: center;
+  }
+
+  .desktopBoardControlsRow {
+    display: grid;
+    grid-template-columns: 44px 58px 44px 1fr;
+    gap: 8px;
+    direction: ltr;
+  }
+
+  .desktopBoardControlsRow button,
+  .desktopBoardControlsRow span {
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border-radius: 15px;
+    font-weight: 950;
+  }
+
+  .desktopBoardControlsRow button {
+    border: 0;
+    background: #ffffff;
+    color: #073321;
+    font-size: 15px;
+  }
+
+  .desktopBoardControlsRow button:last-child {
+    font-size: 13px;
+  }
+
+  .desktopBoardControlsRow span {
+    background: rgba(255, 255, 255, 0.14);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    font-size: 13px;
+  }
+}
+
+/* خلي تحكم الجوال مثل ما هو وما يتأثر بالنقل */
+@media (max-width: 768px) and (hover: none) and (pointer: coarse) {
+  .desktopBoardControls {
+    display: none !important;
+  }
+
+  .mobileBoardHeader .toolbar {
+    display: flex !important;
+  }
 }
