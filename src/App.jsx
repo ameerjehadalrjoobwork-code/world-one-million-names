@@ -1356,24 +1356,23 @@ function AdminPage() {
       const imageUrl = await uploadImageToSupabase(optimizedFile, cellId, pageNumber);
 
       const { error } = await supabase.from("pixel_cells").upsert(
-        {
-          id: cellId,
-          page_number: pageNumber,
-          row,
-          col,
-          owner_name: manualCell.ownerName.trim(),
-          city: manualCell.city.trim(),
-          description: manualCell.description.trim(),
-          image_url: imageUrl,
-          buyer_email: manualCell.buyerEmail.trim(),
-          buyer_phone: manualCell.buyerPhone.trim(),
-          status: "approved",
-          payment_confirmed_at: new Date().toISOString(),
-        },
-        {
-          onConflict: "id",
-        }
-      );
+  {
+    id: cellId,
+    page_number: pageNumber,
+    row_index: row,
+    col_index: col,
+    owner_name: manualCell.ownerName.trim(),
+    city: manualCell.city.trim() || null,
+    description: manualCell.description.trim() || null,
+    image_url: imageUrl,
+    payment_method: "manual",
+    status: "approved",
+    payment_confirmed_at: new Date().toISOString(),
+  },
+  {
+    onConflict: "id",
+  }
+);
 
       if (error) {
         throw error;
